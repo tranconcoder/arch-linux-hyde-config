@@ -227,6 +227,38 @@ backup_config_dir() {
     fi
 }
 
+# Special backup for hyde - only config.toml (not themes/wallbash which are ~572MB)
+backup_hyde_config() {
+    local hyde_dir="$CONFIG_DIR/hyde"
+    local config_file="$hyde_dir/config.toml"
+    local archive_name="hyde.tar.gz"
+    local archive_path="$BACKUP_DIR/$archive_name"
+    
+    log_debug "Starting hyde config backup (config.toml only)"
+    log_debug "  Source: $config_file"
+    log_debug "  Destination: $archive_path"
+    
+    if [ ! -f "$config_file" ]; then
+        log_warning "Hyde config not found: $config_file - Skipping"
+        return 1
+    fi
+    
+    log_info "Backing up hyde (config.toml only)..."
+    
+    # Create archive with just config.toml, preserving directory structure
+    tar -czf "$archive_path" -C "$CONFIG_DIR" "hyde/config.toml" 2>/dev/null
+    
+    if [ $? -eq 0 ]; then
+        local size=$(get_archive_size "$archive_path")
+        log_success "hyde backup complete: $archive_name ($size)"
+        log_debug "Archive created successfully"
+        return 0
+    else
+        log_error "Failed to backup hyde config"
+        return 1
+    fi
+}
+
 backup_fan_files() {
     local archive_name="fan_setup.tar.gz"
     local archive_path="$BACKUP_DIR/$archive_name"
@@ -319,7 +351,7 @@ main() {
     for item in "${SELECTED_ITEMS[@]}"; do
         case $item in
             "hyde")
-                if backup_config_dir "$CONFIG_DIR/hyde" "hyde"; then
+                if backup_hyde_config; then
                     ((success_count++))
                 fi
                 ;;
@@ -377,7 +409,7 @@ if [[ "$1" == "--all" || "$1" == "-a" ]]; then
     local success_count=0
     for item in "${SELECTED_ITEMS[@]}"; do
         case $item in
-            "hyde") backup_config_dir "$CONFIG_DIR/hyde" "hyde" && ((success_count++)) ;;
+            "hyde") backup_hyde_config && ((success_count++)) ;;
             "hypr") backup_config_dir "$CONFIG_DIR/hypr" "hypr" && ((success_count++)) ;;
             "kitty") backup_config_dir "$CONFIG_DIR/kitty" "kitty" && ((success_count++)) ;;
             "fan_setup") backup_fan_files && ((success_count++)) ;;
