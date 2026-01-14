@@ -81,7 +81,7 @@ log_debug() {
 # ============================================
 
 # Max chunk size in MB (for upload limits like GitHub 100MB)
-CHUNK_SIZE_MB=90
+CHUNK_SIZE_MB=10
 CHUNK_SIZE_BYTES=$((CHUNK_SIZE_MB * 1024 * 1024))
 
 create_backup_dir() {

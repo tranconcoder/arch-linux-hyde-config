@@ -1,10 +1,14 @@
+# Update system packages
 sudo pacman -Syyu
 sudo pacman -S git base-devel --needed
 
+# Install yay
 git clone https://aur.archlinux.org/yay.git ~/
 cd ~/yay
 makepkg -si
 cd ~
+
+# Update with yay
 sudo yay -Syyu
 
 # Install apps
