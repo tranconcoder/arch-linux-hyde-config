@@ -1,0 +1,10 @@
+include:
+  - project: tvconss/gitlab-tools
+    ref: main
+    file: sync-to-github/.gitlab-ci.yml
+
+stages:
+  - sync-to-github
+
+variables:
+  GITHUB_REPO: "archlinux-setup"
