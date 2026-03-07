@@ -29,6 +29,7 @@ declare -A BACKUP_ITEMS=(
     ["hyde"]="$CONFIG_DIR/hyde"
     ["hypr"]="$CONFIG_DIR/hypr"
     ["kitty"]="$CONFIG_DIR/kitty"
+    ["waybar"]="$CONFIG_DIR/waybar"
     ["fan_setup"]="FAN_FILES"
 )
 
@@ -154,6 +155,7 @@ show_selection_menu() {
     echo "  2) hypr       - ~/.config/hypr"
     echo "  3) kitty      - ~/.config/kitty"
     echo "  4) fan_setup  - Fan/Performance scripts"
+    echo "  5) waybar     - ~/.config/waybar"
     echo "  ---"
     echo "  a) Tất cả"
     echo "  q) Thoát"
@@ -173,7 +175,7 @@ parse_selection() {
     fi
     
     if [[ "$input" == "a" || "$input" == "A" || -z "$input" ]]; then
-        SELECTED_ITEMS=("hyde" "hypr" "kitty" "fan_setup")
+        SELECTED_ITEMS=("hyde" "hypr" "kitty" "waybar" "fan_setup")
         return
     fi
     
@@ -183,6 +185,7 @@ parse_selection() {
             2) SELECTED_ITEMS+=("hypr") ;;
             3) SELECTED_ITEMS+=("kitty") ;;
             4) SELECTED_ITEMS+=("fan_setup") ;;
+            5) SELECTED_ITEMS+=("waybar") ;;
             *) log_warning "Lựa chọn không hợp lệ: $num" ;;
         esac
     done
@@ -365,6 +368,11 @@ main() {
                     ((success_count++))
                 fi
                 ;;
+            "waybar")
+                if backup_config_dir "$CONFIG_DIR/waybar" "waybar"; then
+                    ((success_count++))
+                fi
+                ;;
             "fan_setup")
                 if backup_fan_files; then
                     ((success_count++))
@@ -394,7 +402,7 @@ main() {
 
 # Check for --all flag (skip menu)
 if [[ "$1" == "--all" || "$1" == "-a" ]]; then
-    SELECTED_ITEMS=("hyde" "hypr" "kitty" "fan_setup")
+    SELECTED_ITEMS=("hyde" "hypr" "kitty" "waybar" "fan_setup")
     
     echo ""
     echo "============================================"
@@ -406,12 +414,13 @@ if [[ "$1" == "--all" || "$1" == "-a" ]]; then
     log_debug "Script started with --all flag"
     create_backup_dir
     
-    local success_count=0
+    success_count=0
     for item in "${SELECTED_ITEMS[@]}"; do
         case $item in
             "hyde") backup_hyde_config && ((success_count++)) ;;
             "hypr") backup_config_dir "$CONFIG_DIR/hypr" "hypr" && ((success_count++)) ;;
             "kitty") backup_config_dir "$CONFIG_DIR/kitty" "kitty" && ((success_count++)) ;;
+            "waybar") backup_config_dir "$CONFIG_DIR/waybar" "waybar" && ((success_count++)) ;;
             "fan_setup") backup_fan_files && ((success_count++)) ;;
         esac
     done

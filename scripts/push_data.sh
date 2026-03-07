@@ -28,23 +28,23 @@ declare -a AVAILABLE_FOLDERS=()
 # ============================================
 
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $1" >&2
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1" >&2
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 log_debug() {
-    echo -e "${BLUE}[DEBUG]${NC} $(date '+%H:%M:%S') - $1"
+    echo -e "${BLUE}[DEBUG]${NC} $(date '+%H:%M:%S') - $1" >&2
 }
 
 # ============================================
@@ -74,21 +74,21 @@ list_backup_folders() {
         return 1
     fi
     
-    echo ""
-    echo -e "${CYAN}============================================${NC}"
-    echo -e "${CYAN}  Available backup folders:${NC}"
-    echo -e "${CYAN}============================================${NC}"
+    echo "" >&2
+    echo -e "${CYAN}============================================${NC}" >&2
+    echo -e "${CYAN}  Available backup folders:${NC}" >&2
+    echo -e "${CYAN}============================================${NC}" >&2
     local i=1
     for folder in "${folders[@]}"; do
         local basename=$(basename "$folder")
         local file_count=$(ls -1 "$folder"/*.tar.gz 2>/dev/null | wc -l)
         local files=$(ls -1 "$folder"/*.tar.gz 2>/dev/null | xargs -I{} basename {} .tar.gz | tr '\n' ', ' | sed 's/,$//')
-        echo "  $i) $basename ($file_count files: $files)"
+        echo "  $i) $basename ($file_count files: $files)" >&2
         ((i++))
     done
-    echo ""
-    echo "  0) Hủy"
-    echo ""
+    echo "" >&2
+    echo "  0) Hủy" >&2
+    echo "" >&2
     
     # Store folders for later use
     AVAILABLE_FOLDERS=("${folders[@]}")
@@ -126,7 +126,7 @@ select_backup_folder() {
         echo "${AVAILABLE_FOLDERS[$((choice-1))]}"
         return 0
     else
-        log_warning "Lựa chọn không hợp lệ, dùng backup mới nhất"
+        log_warning "Lựa chọn không hợp lệ, dùng backup mới nhất" >&2
         echo "${AVAILABLE_FOLDERS[0]}"
         return 0
     fi
@@ -276,6 +276,7 @@ restore_interactive() {
     echo "  2) hypr"
     echo "  3) kitty"
     echo "  4) fan_setup"
+    echo "  5) waybar"
     echo "  a) All"
     echo ""
     read -p "Select (space-separated, e.g. 1 2 3): " selections
@@ -283,7 +284,7 @@ restore_interactive() {
     local success_count=0
     
     if [[ "$selections" == "a" || "$selections" == "A" ]]; then
-        selections="1 2 3 4"
+        selections="1 2 3 4 5"
     fi
     
     for sel in $selections; do
@@ -292,6 +293,7 @@ restore_interactive() {
             2) restore_config "$backup_folder" "hypr" "$CONFIG_DIR" && ((success_count++)) ;;
             3) restore_config "$backup_folder" "kitty" "$CONFIG_DIR" && ((success_count++)) ;;
             4) restore_fan_files "$backup_folder" && ((success_count++)) ;;
+            5) restore_config "$backup_folder" "waybar" "$CONFIG_DIR" && ((success_count++)) ;;
         esac
     done
     
@@ -333,6 +335,7 @@ restore_latest() {
     restore_config "$backup_folder" "hyde" "$CONFIG_DIR" && ((success_count++))
     restore_config "$backup_folder" "hypr" "$CONFIG_DIR" && ((success_count++))
     restore_config "$backup_folder" "kitty" "$CONFIG_DIR" && ((success_count++))
+    restore_config "$backup_folder" "waybar" "$CONFIG_DIR" && ((success_count++))
     restore_fan_files "$backup_folder" && ((success_count++))
     
     echo ""
